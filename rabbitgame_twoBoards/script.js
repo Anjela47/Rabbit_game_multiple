@@ -9,22 +9,18 @@ const FENCE_PROCENT = 0.4
 let character = [
   {
     name: "rabbit",
-    img: "/images/rabbit.png",
     num: RABBIT_CELL,
   },
   {
     name: "home",
-    img: "/images/home.png",
     num: HOME_CELL,
   },
   {
     name: "wolf",
-    img: "/images/wolf.png",
     num: WOLF_CELL,
   },
   {
     name: "fence",
-    img: "/images/fence.png",
     num: FENCE_CELL,
   },
 ]
@@ -53,6 +49,7 @@ function rabbitEventMove(gameState) {
     wolfStep(gameState)
     console.log(array)
     DrawBoard(gameState.array)
+
     message(gameState)
   }
 }
@@ -108,19 +105,17 @@ function wolfStep(gameState) {
   array = gameState.array
   const listOfWolfIndexes = getCurrentDir(array, WOLF_CELL)
   const listOfRabbitIndex = getCurrentDir(array, RABBIT_CELL)[0]
-  if (listOfRabbitIndex) {
-    listOfWolfIndexes.forEach((index) => {
-      const requiredWolfAreaIndexes = getRequiredWolfAreaIndexes(array, index)
-      const requiredIndex = []
-      const distances = []
-      requiredWolfAreaIndexes.forEach((coord) => {
-        distances.push(findDistance(coord, listOfRabbitIndex))
-        requiredIndex.push(coord)
-      })
-      i = distances.indexOf(Math.min(...distances))
-      wolfMove(gameState, requiredIndex[i], index)
+  listOfWolfIndexes.forEach((wolfIndex) => {
+    const requiredWolfAreaIndexes = getRequiredWolfAreaIndexes(array, wolfIndex)
+    const requiredIndex = []
+    const distances = []
+    requiredWolfAreaIndexes.forEach((coord) => {
+      distances.push(findDistance(coord, listOfRabbitIndex))
+      requiredIndex.push(coord)
     })
-  }
+    index = distances.indexOf(Math.min(...distances))
+    wolfMove(gameState, requiredIndex[index], wolfIndex)
+  })
 }
 
 function wolfMove(gameState, [newX, newY], [oldX, oldY]) {
@@ -150,16 +145,16 @@ function getRequiredWolfAreaIndexes(array, index) {
   const down = [wolfX + 1, wolfY]
   const left = [wolfX, wolfY - 1]
   const wolfAreaIndexes = []
-  if (checkValid(up, array)) {
+  if (isInRange(up, array)) {
     wolfAreaIndexes.push(up)
   }
-  if (checkValid(right, array)) {
+  if (isInRange(right, array)) {
     wolfAreaIndexes.push(right)
   }
-  if (checkValid(down, array)) {
+  if (isInRange(down, array)) {
     wolfAreaIndexes.push(down)
   }
-  if (checkValid(left, array)) {
+  if (isInRange(left, array)) {
     wolfAreaIndexes.push(left)
   }
   return wolfAreaIndexes.filter(
@@ -173,78 +168,48 @@ function findDistance([x1, y1], [x2, y2]) {
   return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2))
 }
 
-function checkValid([x, y], array) {
+function isInRange([x, y], array) {
   if (x != array.length && x >= 0 && y != array.length && y >= 0) {
     return true
   }
 }
 
 function rabbitStep(gameState, step) {
-  const listOfIndexes = getCurrentDir(gameState.array, RABBIT_CELL)[0]
   if (gameState.isGameOver === false) {
+    let index = []
     if (step === "ArrowLeft") {
-      moveRabbitToLeft(gameState, listOfIndexes)
+      index = [0, -1]
     } else if (step === "ArrowUp") {
-      moveRabbitToUp(gameState, listOfIndexes)
+      index = [-1, 0]
     } else if (step === "ArrowRight") {
-      moveRabbitToRight(gameState, listOfIndexes)
+      index = [0, 1]
     } else if (step === "ArrowDown") {
-      moveRabbitToDown(gameState, listOfIndexes)
+      index = [1, 0]
     }
+    moveRabbit(gameState, index)
   }
 }
-
-function moveRabbitToLeft(gameState, [oldX, oldY]) {
-  console.log(gameState.array)
-  array = gameState.array
-  console.log()
-  if (oldY === 0 && array[oldX][array.length - 1] != FENCE_CELL) {
-    iswin(gameState, [oldX, array.length - 1])
-    array[oldX][array.length - 1] = RABBIT_CELL
-    array[oldX][oldY] = EMPTY_CELL
-  } else if (array[oldX][array.length - 1] != FENCE_CELL) {
-    moveRabbit(gameState, [oldX, oldY], [oldX, oldY - 1])
+function moveRabbit(gameState, [newX, newY]) {
+  const array = gameState.array
+  const listOfIndexes = getCurrentDir(gameState.array, RABBIT_CELL)[0]
+  const [oldX, oldY] = listOfIndexes
+  let x = ""
+  let y = ""
+  if (newX === -1 && oldX === 0) {
+    ;[x, y] = [oldX + array.length - 1, oldY + newY]
+  } else if (newX === 1 && oldX === array.length - 1) {
+    ;[x, y] = [array.length - oldX - 1, oldY + newY]
+  } else if (newY === 1 && oldY === array.length - 1) {
+    ;[x, y] = [oldX + newX, array.length - oldY - 1]
+  } else if (newY === -1 && oldY === 0) {
+    ;[x, y] = [oldX + newX, oldY + array.length - 1]
+  } else {
+    ;[x, y] = [oldX + newX, oldY + newY]
   }
-}
-
-function moveRabbitToUp(gameState, [oldX, oldY]) {
-  array = gameState.array
-  if (oldX === 0 && array[array.length - 1][oldY] != FENCE_CELL) {
-    iswin(gameState, [array.length - 1, oldY])
-    array[array.length - 1][oldY] = RABBIT_CELL
-    array[oldX][oldY] = EMPTY_CELL
-  } else if (array[array.length - 1][oldY] != FENCE_CELL) {
-    moveRabbit(gameState, [oldX, oldY], [oldX - 1, oldY])
-  }
-}
-
-function moveRabbitToRight(gameState, [oldX, oldY]) {
-  array = gameState.array
-  if (oldY === array.length - 1 && array[oldX][0] != FENCE_CELL) {
-    iswin(gameState, [oldX, 0])
-    array[oldX][0] = RABBIT_CELL
-    array[oldX][oldY] = EMPTY_CELL
-  } else if (array[oldX][0] != FENCE_CELL) {
-    moveRabbit(gameState, [oldX, oldY], [oldX, oldY + 1])
-  }
-}
-
-function moveRabbitToDown(gameState, [oldX, oldY]) {
-  array = gameState.array
-  if (oldX === array.length - 1 && array[0][oldY] != FENCE_CELL) {
-    iswin(gameState, [0, oldY])
-    array[0][oldY] = RABBIT_CELL
-    array[oldX][oldY] = EMPTY_CELL
-  } else if (array[0][oldY] != FENCE_CELL) {
-    moveRabbit(gameState, [oldX, oldY], [oldX + 1, oldY])
-  }
-}
-
-function moveRabbit(gameState, [oldX, oldY], [newX, newY]) {
-  array = gameState.array
-  if (array[newX][newY] != FENCE_CELL) {
-    iswin(gameState, [newX, newY])
-    array[newX][newY] = RABBIT_CELL
+  console.log(x, y)
+  iswin(gameState, [x, y])
+  if (gameState.isGameOver === false && array[x][y] !== FENCE_CELL) {
+    array[x][y] = RABBIT_CELL
     array[oldX][oldY] = EMPTY_CELL
   }
 }
