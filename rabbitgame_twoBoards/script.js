@@ -28,23 +28,15 @@ let character = [
 function newGame() {
   gameNumber++
   const container = document.getElementById("container")
-
   const GAME = document.createElement("div")
   GAME.id = `game_${gameNumber}`
   const btnDiv = createStartBtn(gameNumber)
   const select = createSelectDiv(gameNumber)
   const main = createMainBoard(gameNumber)
   const messageDiv = createMessageBox(gameNumber)
-  GAME.append(messageDiv, btnDiv, select, main)
+  GAME.append(btnDiv, select, messageDiv, main)
   container.appendChild(GAME)
-
-  document.getElementById(`startBtn_${gameNumber}`).onclick = function () {
-    startGame(gameNumber)
-  }
-  document.getElementById(`startAgain_${gameNumber}`).onclick = function () {
-    document.getElementById(`messageBox_${gameNumber}`).style.display = "none"
-    startGame(gameNumber)
-  }
+  startGame(gameNumber)
 }
 
 function startGame(gameNumber) {
@@ -60,10 +52,20 @@ function startGame(gameNumber) {
   DrawBoard(gameState)
   document.getElementById(`board_${gameNumber}`).style.display = "block"
   const buttons = document.getElementById(`buttons_${gameNumber}`)
-
+  buttons.removeEventListener("click", function (event) {
+    moveEvent(gameState)
+  })
   buttons.addEventListener("click", function (event) {
     moveEvent(gameState)
   })
+
+  document.getElementById(`startBtn_${gameNumber}`).onclick = function () {
+    startGame(gameNumber)
+  }
+  document.getElementById(`startAgain_${gameNumber}`).onclick = function () {
+    document.getElementById(`messageBox_${gameNumber}`).style.display = "none"
+    startGame(gameNumber)
+  }
 }
 
 function moveEvent(gameState) {
@@ -153,21 +155,13 @@ function wolfMove(gameState, [newX, newY], [oldX, oldY]) {
 
 function iswin(gameState, [x, y]) {
   const array = gameState.array
-  const buttons = document.getElementById(`buttons_${gameState.gameNumber}`)
   if (array[x][y] === HOME_CELL) {
     gameState.gameMessage = "That's Great! You win^^"
     gameState.isGameOver = true
-
-    buttons.removeEventListener("click", function (event) {
-      moveEvent(gameState)
-    })
   } else if (array[x][y] === WOLF_CELL || array[x][y] === RABBIT_CELL) {
     gameState.gameMessage = ":(.. Game over"
     gameState.isGameOver = true
   }
-  buttons.removeEventListener("click", function (event) {
-    moveEvent(gameState)
-  })
 }
 
 function getRequiredWolfAreaIndexes(array, index) {
