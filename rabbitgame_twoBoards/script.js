@@ -34,7 +34,8 @@ function newGame() {
   const select = createSelectDiv(gameNumber)
   const main = createMainBoard(gameNumber)
   const messageDiv = createMessageBox(gameNumber)
-  GAME.append(btnDiv, select, messageDiv, main)
+  container.appendChild(messageDiv)
+  GAME.append(btnDiv, select, main)
   container.appendChild(GAME)
   startGame(gameNumber)
 }
@@ -50,7 +51,7 @@ function startGame(gameNumber) {
   setPositions(array)
   console.log(array)
   DrawBoard(gameState)
-  document.getElementById(`board_${gameNumber}`).style.display = "block"
+  document.getElementById(`game_${gameNumber}`).style.display = "block"
   const buttons = document.getElementById(`buttons_${gameNumber}`)
   buttons.removeEventListener("click", function (event) {
     moveEvent(gameState)
@@ -244,7 +245,7 @@ function message(gameState) {
   const gameNumber = gameState.gameNumber
   if (gameState.isGameOver === true) {
     document.getElementById(`messageBox_${gameNumber}`).style.display = "block"
-    document.getElementById(`board_${gameNumber}`).style.display = "none"
+    document.getElementById(`game_${gameNumber}`).style.display = "none"
     document.getElementById(`message_${gameNumber}`).innerHTML =
       gameState.gameMessage
   }
