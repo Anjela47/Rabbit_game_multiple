@@ -38,7 +38,9 @@ function newGame() {
   GAME.append(messageDiv, btnDiv, select, main)
   container.appendChild(GAME)
 
-  startGame(gameNumber)
+  document.getElementById(`startBtn_${gameNumber}`).onclick = function () {
+    startGame(gameNumber)
+  }
   document.getElementById(`startAgain_${gameNumber}`).onclick = function () {
     document.getElementById(`messageBox_${gameNumber}`).style.display = "none"
     startGame(gameNumber)
@@ -46,7 +48,6 @@ function newGame() {
 }
 
 function startGame(gameNumber) {
-  document.getElementById(`board_${gameNumber}`).style.display = "block"
   const array = createArray(gameNumber)
   const gameState = {
     array: array,
@@ -57,6 +58,7 @@ function startGame(gameNumber) {
   setPositions(array)
   console.log(array)
   DrawBoard(gameState)
+  document.getElementById(`board_${gameNumber}`).style.display = "block"
   const buttons = document.getElementById(`buttons_${gameNumber}`)
 
   buttons.addEventListener("click", function (event) {
@@ -316,7 +318,6 @@ function createStartBtn(gameNumber) {
   const btn = document.createElement("button")
   btn.id = `startBtn_${gameNumber}`
   btn.innerText = "Start"
-  btn.onclick = startGame
   div.appendChild(btn)
   div.style.display = "inline-block"
   return div
@@ -362,25 +363,23 @@ function createButtons(div) {
   const right = createButton("right")
   div.append(up, left, right, down)
 }
-
+function createOption(value) {
+  const option = document.createElement("option")
+  option.value = `${value}`
+  option.innerText = `${value}x${value}`
+  return option
+}
 function createSelectDiv(gameNumber) {
   const selectDiv = document.createElement("div")
   selectDiv.className = `select_${gameNumber}`
   const select = document.createElement("select")
   select.id = `selectNum_${gameNumber}`
 
-  const option1 = document.createElement("option")
-  option1.value = "5"
-  option1.innerText = "5x5"
+  const option1 = createOption(5)
   select.appendChild(option1)
-  const option2 = document.createElement("option")
-  option2.value = "7"
-
-  option2.innerText = "7x7"
+  const option2 = createOption(7)
   select.appendChild(option2)
-  const option3 = document.createElement("option")
-  option3.value = "10"
-  option3.innerText = "10x10"
+  const option3 = createOption(10)
   select.appendChild(option3)
   selectDiv.appendChild(select)
   selectDiv.style.display = "inline-block"
