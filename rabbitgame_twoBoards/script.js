@@ -327,6 +327,7 @@ function createMessageBox(gameNumber) {
   btn.innerText = "Start Again"
   messageBox.append(message, btn)
   messageBox.style.display = "none"
+  messageBox.style.margin = "20px"
   messageBox.style.marginLeft = "45%"
   return messageBox
 }
