@@ -9,25 +9,35 @@ const FENCE_PROCENT = 0.4
 let character = [
   {
     name: "rabbit",
-    num: RABBIT_CELL,
+    num: RABBIT_CELL
   },
   {
     name: "home",
-    num: HOME_CELL,
+    num: HOME_CELL
   },
   {
     name: "wolf",
-    num: WOLF_CELL,
+    num: WOLF_CELL
   },
   {
     name: "fence",
-    num: FENCE_CELL,
-  },
+    num: FENCE_CELL
+  }
 ]
+const GAME = document.getElementById("game")
+function newGame() {
+  createMessageBox()
+  createStartBtn()
+  createSelectDiv()
+  createMainBoard()
+  createButtons()
 
-document.getElementById("startAgain").onclick = function () {
-  document.getElementById("messageBox").style.display = "none"
   startGame()
+  document.getElementById("startAgain").onclick = function () {
+    document.getElementById("messageBox").style.display = "none"
+
+    startGame()
+  }
 }
 
 function startGame() {
@@ -35,23 +45,26 @@ function startGame() {
   const gameState = {
     array: array,
     isGameOver: false,
-    gameMessage: "",
+    gameMessage: ""
   }
   setPositions(array)
   console.log(array)
   DrawBoard(array)
-  rabbitEventMove(gameState)
+  MoveEvent(gameState)
 }
 
-function rabbitEventMove(gameState) {
-  window.onkeydown = (event) => {
-    rabbitStep(gameState, event.key)
+function MoveEvent(gameState) {
+  function EventId(event) {
+    rabbitStep(gameState, event.target.id)
     wolfStep(gameState)
-    console.log(array)
+    console.log(gameState.array)
     DrawBoard(gameState.array)
 
     message(gameState)
   }
+  const buttons = document.getElementById("buttons")
+  buttons.removeEventListener("click", EventId)
+  buttons.addEventListener("click", EventId)
 }
 
 function createArray() {
@@ -102,7 +115,7 @@ function setIndexes(characterName, array) {
 }
 
 function wolfStep(gameState) {
-  array = gameState.array
+  const array = gameState.array
   const listOfWolfIndexes = getCurrentDir(array, WOLF_CELL)
   const listOfRabbitIndex = getCurrentDir(array, RABBIT_CELL)[0]
   listOfWolfIndexes.forEach((wolfIndex) => {
@@ -119,6 +132,7 @@ function wolfStep(gameState) {
 }
 
 function wolfMove(gameState, [newX, newY], [oldX, oldY]) {
+  const array = gameState.array
   if (gameState.isGameOver === false) {
     iswin(gameState, [newX, newY])
     array[newX][newY] = WOLF_CELL
@@ -127,7 +141,7 @@ function wolfMove(gameState, [newX, newY], [oldX, oldY]) {
 }
 
 function iswin(gameState, [x, y]) {
-  array = gameState.array
+  const array = gameState.array
   if (array[x][y] === HOME_CELL) {
     gameState.gameMessage = "That's Great! You win^^"
     gameState.isGameOver = true
@@ -177,13 +191,13 @@ function isInRange([x, y], array) {
 function rabbitStep(gameState, step) {
   if (gameState.isGameOver === false) {
     let index = []
-    if (step === "ArrowLeft") {
+    if (step === "left") {
       index = [0, -1]
-    } else if (step === "ArrowUp") {
+    } else if (step === "up") {
       index = [-1, 0]
-    } else if (step === "ArrowRight") {
+    } else if (step === "right") {
       index = [0, 1]
-    } else if (step === "ArrowDown") {
+    } else if (step === "down") {
       index = [1, 0]
     }
     moveRabbit(gameState, index)
@@ -206,7 +220,6 @@ function moveRabbit(gameState, [newX, newY]) {
   } else {
     ;[x, y] = [oldX + newX, oldY + newY]
   }
-  console.log(x, y)
   iswin(gameState, [x, y])
   if (gameState.isGameOver === false && array[x][y] !== FENCE_CELL) {
     array[x][y] = RABBIT_CELL
@@ -234,7 +247,7 @@ function getCurrentDir(array, character) {
 }
 
 function DrawBoard(array) {
-  board = document.getElementById("board")
+  const board = document.getElementById("board")
   board.innerHTML = ""
   const width = array.length * 60 + 2 * array.length
   board.style.width = `${width}px`
@@ -252,7 +265,7 @@ function generateDiv(array, i, j) {
   const div = document.createElement("div")
   div.id = `${i}${j}`
   div.className = "box"
-  img = generateImg(array[i][j])
+  const img = generateImg(array[i][j])
   if (img.src != "") {
     div.appendChild(img)
   }
@@ -260,7 +273,7 @@ function generateDiv(array, i, j) {
 }
 
 function generateImg(coord) {
-  img = document.createElement("img")
+  const img = document.createElement("img")
   if (coord === RABBIT_CELL) {
     img.src = "images/rabbit.png"
   }
@@ -274,4 +287,79 @@ function generateImg(coord) {
     img.src = "images/wolf.png"
   }
   return img
+}
+function createStartBtn() {
+  const div = document.createElement("div")
+  div.className = "start"
+  const btn = document.createElement("button")
+  btn.id = "startBtn"
+  btn.innerText = "Start"
+  btn.onclick = startGame
+  div.appendChild(btn)
+  GAME.appendChild(div)
+}
+function createMessageBox() {
+  const messageBox = document.createElement("div")
+  messageBox.id = "messageBox"
+  const message = document.createElement("div")
+  message.id = "message"
+  messageBox.appendChild(message)
+  const btn = document.createElement("button")
+  btn.id = "startAgain"
+  btn.innerText = "Start Again"
+  messageBox.appendChild(btn)
+  GAME.appendChild(messageBox)
+}
+function createMainBoard() {
+  const div = document.createElement("div")
+  div.id = "main"
+  const BoardDiv = document.createElement("div")
+  BoardDiv.id = "board"
+  div.appendChild(BoardDiv)
+  const ButtonsDiv = document.createElement("div")
+  ButtonsDiv.id = "buttons"
+  div.appendChild(ButtonsDiv)
+  GAME.appendChild(div)
+}
+function createButton(step) {
+  const btn = document.createElement("button")
+  btn.id = step
+  btn.innerText = step
+  return btn
+}
+
+function createButtons() {
+  const buttonsArea = document.getElementById("buttons")
+  buttonsArea.innerHTML = ""
+  const up = createButton("up")
+  buttonsArea.appendChild(up)
+  const down = createButton("down")
+  buttonsArea.appendChild(down)
+  const left = createButton("left")
+  buttonsArea.appendChild(left)
+  const right = createButton("right")
+  buttonsArea.appendChild(right)
+}
+
+function createSelectDiv() {
+  const selectDiv = document.createElement("div")
+  selectDiv.className = "select"
+  const select = document.createElement("select")
+  select.id = "selectNum"
+
+  const option1 = document.createElement("option")
+  option1.value = "5"
+  option1.innerText = "5x5"
+  select.appendChild(option1)
+  const option2 = document.createElement("option")
+  option2.value = "7"
+
+  option2.innerText = "7x7"
+  select.appendChild(option2)
+  const option3 = document.createElement("option")
+  option3.value = "10"
+  option3.innerText = "10x10"
+  select.appendChild(option3)
+  selectDiv.appendChild(select)
+  GAME.appendChild(selectDiv)
 }
