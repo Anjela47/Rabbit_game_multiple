@@ -1,20 +1,51 @@
-.game{
+button{
+  border: none;
   background-color: rgb(184, 223, 241);
+  margin:10px;
+  width:100px;
+}
+.start{
+  display:inline-block;
+  margin-left: 40%;
+}
+.select{
+  display: inline-block;
+}
+#newGame{
+  margin-left:45%;
+}
+#board{
+  margin: 0 auto;
 }
 
+#buttons{
+  margin-left:25%;
+}
+#buttons button{
+  border-radius: 10px;
+  border: 1 px solid grey;
+    background-color:rgb(151, 73, 151);
+    margin: 10px;
+    width: 100px;
+}
+#main{
+  margin:0 auto;
+  background-color: rgb(184, 223, 241);
+  border-radius: 20px;
+}
 .box {
     width: 60px;
     height: 60px;
-    background-color: purple;
+    background-color: rgb(151, 73, 151);
     margin: 1px;
     float: left;
   }
 img{
   width: 60px;
   height: 60px;
-  background-image: none;
-  background-color: purple;
+  background-color: rgb(151, 73, 151);
 }
+
 #messageBox {
   width: 100%;
   background-color: rgb(131, 127, 127,0.7);
