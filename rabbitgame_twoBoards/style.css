@@ -37,14 +37,14 @@ button{
 .box {
     width: 60px;
     height: 60px;
-    background-color: rgb(191, 118, 197);
+    background-color: rgb(164, 83, 172);
     margin: 1px;
     float: left;
   }
 img{
   width: 60px;
   height: 60px;
-  background-color: rgb(191, 118, 197);
+  background-color: rgb(164, 83, 172);
 }
 
 #messageBox {
