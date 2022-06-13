@@ -5,7 +5,7 @@ const WOLF_CELL = 3
 const FENCE_CELL = 4
 const WOLF_PROCENT = 0.6
 const FENCE_PROCENT = 0.4
-let gameNumber = 0
+let GAME_NUMBER = 0
 let character = [
   {
     name: "rabbit",
@@ -25,60 +25,64 @@ let character = [
   }
 ]
 
-function createnewGameMain(gameNumber) {
+function createNewGameDiv(GAME_NUMBER) {
   const GAME = document.createElement("div")
-  GAME.id = `game_${gameNumber}`
+  GAME.id = `game_${GAME_NUMBER}`
   GAME.style.textAlign = "center"
   return GAME
 }
 
 function newGame() {
-  gameNumber++
+  GAME_NUMBER++
   const container = document.getElementById("container")
-  const GAME = createnewGameMain(gameNumber)
-  const btnDiv = createStartBtn(gameNumber)
-  const select = createSelectDiv(gameNumber)
-  const main = createMainBoard(gameNumber)
-  const messageDiv = createMessageBox(gameNumber)
+  const GAME = createNewGameDiv(GAME_NUMBER)
+  const btnDiv = createStartBtn(GAME_NUMBER)
+  const select = createSelectDiv(GAME_NUMBER)
+  const main = createMainBoard(GAME_NUMBER)
+  const messageDiv = createMessageBox(GAME_NUMBER)
   container.appendChild(messageDiv)
   GAME.append(btnDiv, select, main)
   container.appendChild(GAME)
-  startGame(gameNumber)
+  document
+    .getElementById(`startBtn_${GAME_NUMBER}`)
+    .addEventListener("click", function () {
+      startGame(GAME_NUMBER)
+    })
 }
 
-function startGame(gameNumber) {
-  const array = createArray(gameNumber)
+function startGame(GAME_NUMBER) {
+  createButtons()
+  const array = createArray(GAME_NUMBER)
   const gameState = {
     array: array,
     isGameOver: false,
     gameMessage: "",
-    gameNumber: gameNumber
+    gameNumber: GAME_NUMBER
   }
   setPositions(array)
   console.log(array)
   DrawBoard(gameState)
-  document.getElementById(`game_${gameNumber}`).style.display = "block"
-  const buttons = document.getElementById(`buttons_${gameNumber}`)
-  buttons.addEventListener("click", function (event) {
-    rabbitStep(gameState, event.target.id)
-    wolfStep(gameState)
-    console.log(gameState.array)
-    DrawBoard(gameState)
-    message(gameState)
-  })
-
-  document.getElementById(`startBtn_${gameNumber}`).onclick = function () {
-    startGame(gameNumber)
+  document.getElementById(`game_${GAME_NUMBER}`).style.display = "block"
+  const buttons = document.querySelectorAll(`#buttons_${GAME_NUMBER} > button`)
+  for (let button of buttons) {
+    button.addEventListener("click", function (event) {
+      rabbitStep(gameState, event.target.id)
+      wolfStep(gameState)
+      message(gameState)
+      console.log(gameState.array)
+      DrawBoard(gameState)
+    })
   }
-  document.getElementById(`startAgain_${gameNumber}`).onclick = function () {
-    document.getElementById(`messageBox_${gameNumber}`).style.display = "none"
-    startGame(gameNumber)
+
+  document.getElementById(`startAgain_${GAME_NUMBER}`).onclick = function () {
+    document.getElementById(`messageBox_${GAME_NUMBER}`).style.display = "none"
+    startGame(GAME_NUMBER)
   }
 }
 
-function createArray(gameNumber) {
+function createArray(GAME_NUMBER) {
   const arraySize = parseInt(
-    document.getElementById(`selectNum_${gameNumber}`).value
+    document.getElementById(`selectNum_${GAME_NUMBER}`).value
   )
   const array = new Array(arraySize)
     .fill(EMPTY_CELL)
@@ -153,19 +157,13 @@ function wolfMove(gameState, [newX, newY], [oldX, oldY]) {
 
 function iswin(gameState, [x, y]) {
   const array = gameState.array
-  const buttons = document.getElementById(`buttons_${gameNumber}`)
   if (array[x][y] === HOME_CELL) {
     gameState.gameMessage = "That's Great! You win^^"
-    buttons.removeEventListener("click", function (event) {
-      moveEvent(gameState)
-    })
+
     gameState.isGameOver = true
   } else if (array[x][y] === WOLF_CELL || array[x][y] === RABBIT_CELL) {
     gameState.gameMessage = ":(.. Game over"
     gameState.isGameOver = true
-    buttons.removeEventListener("click", function (event) {
-      moveEvent(gameState)
-    })
   }
 }
 
@@ -248,11 +246,11 @@ function moveRabbit(gameState, [newX, newY]) {
 }
 
 function message(gameState) {
-  const gameNumber = gameState.gameNumber
+  const GAME_NUMBER = gameState.gameNumber
   if (gameState.isGameOver === true) {
-    document.getElementById(`messageBox_${gameNumber}`).style.display = "block"
-    document.getElementById(`game_${gameNumber}`).style.display = "none"
-    document.getElementById(`message_${gameNumber}`).innerHTML =
+    document.getElementById(`messageBox_${GAME_NUMBER}`).style.display = "block"
+    document.getElementById(`game_${GAME_NUMBER}`).style.display = "none"
+    document.getElementById(`message_${GAME_NUMBER}`).innerHTML =
       gameState.gameMessage
   }
 }
@@ -270,9 +268,9 @@ function getCurrentDir(array, character) {
 }
 
 function DrawBoard(gameState) {
-  const gameNumber = gameState.gameNumber
+  const GAME_NUMBER = gameState.gameNumber
   const array = gameState.array
-  const board = document.getElementById(`board_${gameNumber}`)
+  const board = document.getElementById(`board_${GAME_NUMBER}`)
   board.innerHTML = ""
   const width = array.length * 60 + 2 * array.length
   board.style.width = `${width}px`
@@ -314,24 +312,24 @@ function generateImg(coord) {
   return img
 }
 
-function createStartBtn(gameNumber) {
+function createStartBtn(GAME_NUMBER) {
   const div = document.createElement("div")
   div.className = "start"
   const btn = document.createElement("button")
-  btn.id = `startBtn_${gameNumber}`
+  btn.id = `startBtn_${GAME_NUMBER}`
   btn.innerText = "Start"
   div.appendChild(btn)
   div.style.display = "inline-block"
   return div
 }
 
-function createMessageBox(gameNumber) {
+function createMessageBox(GAME_NUMBER) {
   const messageBox = document.createElement("div")
-  messageBox.id = `messageBox_${gameNumber}`
+  messageBox.id = `messageBox_${GAME_NUMBER}`
   const message = document.createElement("div")
-  message.id = `message_${gameNumber}`
+  message.id = `message_${GAME_NUMBER}`
   const btn = document.createElement("button")
-  btn.id = `startAgain_${gameNumber}`
+  btn.id = `startAgain_${GAME_NUMBER}`
   btn.innerText = "Start Again"
   messageBox.append(message, btn)
   messageBox.style.textAlign = "center"
@@ -340,16 +338,16 @@ function createMessageBox(gameNumber) {
   return messageBox
 }
 
-function createMainBoard(gameNumber) {
+function createMainBoard(GAME_NUMBER) {
   const div = document.createElement("div")
-  div.id = `main_${gameNumber}`
+  div.id = `main_${GAME_NUMBER}`
   const BoardDiv = document.createElement("div")
-  BoardDiv.id = `board_${gameNumber}`
+  BoardDiv.id = `board_${GAME_NUMBER}`
   BoardDiv.style.margin = "0 auto"
   div.appendChild(BoardDiv)
   const ButtonsDiv = document.createElement("div")
-  ButtonsDiv.id = `buttons_${gameNumber}`
-  createButtons(ButtonsDiv)
+  ButtonsDiv.id = `buttons_${GAME_NUMBER}`
+
   div.appendChild(ButtonsDiv)
   return div
 }
@@ -361,12 +359,14 @@ function createButton(step) {
   return btn
 }
 
-function createButtons(div) {
+function createButtons() {
+  const ButtonsDiv = document.getElementById(`buttons_${GAME_NUMBER}`)
+  ButtonsDiv.innerHTML = ""
   const up = createButton("up")
   const down = createButton("down")
   const left = createButton("left")
   const right = createButton("right")
-  div.append(up, left, right, down)
+  ButtonsDiv.append(up, left, right, down)
 }
 
 function createOption(value) {
@@ -376,11 +376,11 @@ function createOption(value) {
   return option
 }
 
-function createSelectDiv(gameNumber) {
+function createSelectDiv(GAME_NUMBER) {
   const selectDiv = document.createElement("div")
-  selectDiv.className = `select_${gameNumber}`
+  selectDiv.className = `select_${GAME_NUMBER}`
   const select = document.createElement("select")
-  select.id = `selectNum_${gameNumber}`
+  select.id = `selectNum_${GAME_NUMBER}`
 
   const option1 = createOption(5)
   select.appendChild(option1)
