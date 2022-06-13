@@ -13,8 +13,7 @@ button{
 .select{
   display: inline-block;
 }
-#newGame{
-  margin-left:45%;
+.newbutton{
   text-align: center;
 }
 #board{
