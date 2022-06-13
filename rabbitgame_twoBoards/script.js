@@ -217,6 +217,7 @@ function rabbitStep(gameState, step) {
     moveRabbit(gameState, index)
   }
 }
+
 function moveRabbit(gameState, [newX, newY]) {
   const array = gameState.array
   const listOfIndexes = getCurrentDir(gameState.array, RABBIT_CELL)[0]
@@ -234,6 +235,7 @@ function moveRabbit(gameState, [newX, newY]) {
   } else {
     ;[x, y] = [oldX + newX, oldY + newY]
   }
+
   iswin(gameState, [x, y])
   if (gameState.isGameOver === false && array[x][y] !== FENCE_CELL) {
     array[x][y] = RABBIT_CELL
@@ -307,6 +309,7 @@ function generateImg(coord) {
   }
   return img
 }
+
 function createStartBtn(gameNumber) {
   const div = document.createElement("div")
   div.className = "start"
@@ -317,6 +320,7 @@ function createStartBtn(gameNumber) {
   div.style.display = "inline-block"
   return div
 }
+
 function createMessageBox(gameNumber) {
   const messageBox = document.createElement("div")
   messageBox.id = `messageBox_${gameNumber}`
@@ -331,6 +335,7 @@ function createMessageBox(gameNumber) {
   messageBox.style.marginLeft = "45%"
   return messageBox
 }
+
 function createMainBoard(gameNumber) {
   const div = document.createElement("div")
   div.id = `main_${gameNumber}`
@@ -345,6 +350,7 @@ function createMainBoard(gameNumber) {
   div.appendChild(ButtonsDiv)
   return div
 }
+
 function createButton(step) {
   const btn = document.createElement("button")
   btn.id = step
@@ -359,12 +365,14 @@ function createButtons(div) {
   const right = createButton("right")
   div.append(up, left, right, down)
 }
+
 function createOption(value) {
   const option = document.createElement("option")
   option.value = `${value}`
   option.innerText = `${value}x${value}`
   return option
 }
+
 function createSelectDiv(gameNumber) {
   const selectDiv = document.createElement("div")
   selectDiv.className = `select_${gameNumber}`
