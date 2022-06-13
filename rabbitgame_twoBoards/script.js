@@ -66,14 +66,9 @@ function startGame(GAME_NUMBER) {
   const buttons = document.querySelectorAll(`#buttons_${GAME_NUMBER} > button`)
   for (let button of buttons) {
     button.addEventListener("click", function (event) {
-      rabbitStep(gameState, event.target.id)
-      wolfStep(gameState)
-      message(gameState)
-      console.log(gameState.array)
-      DrawBoard(gameState)
+      eventMove(gameState, event.target.id)
     })
   }
-
   document
     .getElementById(`startAgain_${GAME_NUMBER}`)
     .addEventListener("click", function () {
@@ -81,6 +76,13 @@ function startGame(GAME_NUMBER) {
         "none"
       startGame(GAME_NUMBER)
     })
+}
+function eventMove(gameState, step) {
+  rabbitStep(gameState, step)
+  wolfStep(gameState)
+  message(gameState)
+  console.log(gameState.array)
+  DrawBoard(gameState)
 }
 
 function createArray(GAME_NUMBER) {
@@ -162,7 +164,6 @@ function iswin(gameState, [x, y]) {
   const array = gameState.array
   if (array[x][y] === HOME_CELL) {
     gameState.gameMessage = "That's Great! You win^^"
-
     gameState.isGameOver = true
   } else if (array[x][y] === WOLF_CELL || array[x][y] === RABBIT_CELL) {
     gameState.gameMessage = ":(.. Game over"
@@ -350,7 +351,7 @@ function createMainBoard(GAME_NUMBER) {
   div.appendChild(BoardDiv)
   const ButtonsDiv = document.createElement("div")
   ButtonsDiv.id = `buttons_${GAME_NUMBER}`
-
+  ButtonsDiv.style.marginTop = "5px"
   div.appendChild(ButtonsDiv)
   return div
 }
@@ -364,12 +365,16 @@ function createButton(step) {
 
 function createButtons() {
   const ButtonsDiv = document.getElementById(`buttons_${GAME_NUMBER}`)
-  ButtonsDiv.innerHTML = ""
+  while (ButtonsDiv.lastElementChild) {
+    ButtonsDiv.removeChild(ButtonsDiv.lastElementChild)
+  }
   const up = createButton("up")
+  up.style.display = "block"
+  up.style.margin = "0 auto"
   const down = createButton("down")
   const left = createButton("left")
   const right = createButton("right")
-  ButtonsDiv.append(up, left, right, down)
+  ButtonsDiv.append(up, left, down, right)
 }
 
 function createOption(value) {
