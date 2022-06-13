@@ -74,10 +74,13 @@ function startGame(GAME_NUMBER) {
     })
   }
 
-  document.getElementById(`startAgain_${GAME_NUMBER}`).onclick = function () {
-    document.getElementById(`messageBox_${GAME_NUMBER}`).style.display = "none"
-    startGame(GAME_NUMBER)
-  }
+  document
+    .getElementById(`startAgain_${GAME_NUMBER}`)
+    .addEventListener("click", function () {
+      document.getElementById(`messageBox_${GAME_NUMBER}`).style.display =
+        "none"
+      startGame(GAME_NUMBER)
+    })
 }
 
 function createArray(GAME_NUMBER) {
