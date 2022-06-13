@@ -25,11 +25,17 @@ let character = [
   }
 ]
 
+function createnewGameMain(gameNumber) {
+  const GAME = document.createElement("div")
+  GAME.id = `game_${gameNumber}`
+  GAME.style.textAlign = "center"
+  return GAME
+}
+
 function newGame() {
   gameNumber++
   const container = document.getElementById("container")
-  const GAME = document.createElement("div")
-  GAME.id = `game_${gameNumber}`
+  const GAME = createnewGameMain(gameNumber)
   const btnDiv = createStartBtn(gameNumber)
   const select = createSelectDiv(gameNumber)
   const main = createMainBoard(gameNumber)
@@ -53,11 +59,12 @@ function startGame(gameNumber) {
   DrawBoard(gameState)
   document.getElementById(`game_${gameNumber}`).style.display = "block"
   const buttons = document.getElementById(`buttons_${gameNumber}`)
-  buttons.removeEventListener("click", function (event) {
-    moveEvent(gameState)
-  })
   buttons.addEventListener("click", function (event) {
-    moveEvent(gameState)
+    rabbitStep(gameState, event.target.id)
+    wolfStep(gameState)
+    console.log(gameState.array)
+    DrawBoard(gameState)
+    message(gameState)
   })
 
   document.getElementById(`startBtn_${gameNumber}`).onclick = function () {
@@ -67,16 +74,6 @@ function startGame(gameNumber) {
     document.getElementById(`messageBox_${gameNumber}`).style.display = "none"
     startGame(gameNumber)
   }
-}
-
-function moveEvent(gameState) {
-  if (gameState.isGameOver === false) {
-    rabbitStep(gameState, event.target.id)
-    wolfStep(gameState)
-    console.log(gameState.array)
-    DrawBoard(gameState)
-  }
-  message(gameState)
 }
 
 function createArray(gameNumber) {
@@ -156,12 +153,19 @@ function wolfMove(gameState, [newX, newY], [oldX, oldY]) {
 
 function iswin(gameState, [x, y]) {
   const array = gameState.array
+  const buttons = document.getElementById(`buttons_${gameNumber}`)
   if (array[x][y] === HOME_CELL) {
     gameState.gameMessage = "That's Great! You win^^"
+    buttons.removeEventListener("click", function (event) {
+      moveEvent(gameState)
+    })
     gameState.isGameOver = true
   } else if (array[x][y] === WOLF_CELL || array[x][y] === RABBIT_CELL) {
     gameState.gameMessage = ":(.. Game over"
     gameState.isGameOver = true
+    buttons.removeEventListener("click", function (event) {
+      moveEvent(gameState)
+    })
   }
 }
 
@@ -330,9 +334,9 @@ function createMessageBox(gameNumber) {
   btn.id = `startAgain_${gameNumber}`
   btn.innerText = "Start Again"
   messageBox.append(message, btn)
+  messageBox.style.textAlign = "center"
   messageBox.style.display = "none"
   messageBox.style.margin = "20px"
-  messageBox.style.marginLeft = "45%"
   return messageBox
 }
 
@@ -345,7 +349,6 @@ function createMainBoard(gameNumber) {
   div.appendChild(BoardDiv)
   const ButtonsDiv = document.createElement("div")
   ButtonsDiv.id = `buttons_${gameNumber}`
-  ButtonsDiv.style.marginLeft = "28%"
   createButtons(ButtonsDiv)
   div.appendChild(ButtonsDiv)
   return div
