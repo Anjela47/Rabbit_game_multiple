@@ -42,7 +42,13 @@ function newGame() {
   const messageDiv = createMessageBox(GAME_NUMBER)
   container.appendChild(messageDiv)
   GAME.append(btnDiv, select, main)
-  container.appendChild(GAME)
+  const hr = document.createElement("hr")
+  container.append(GAME, hr)
+  document
+    .getElementById(`startBtn_${GAME_NUMBER}`)
+    .removeEventListener("click", function () {
+      startGame(GAME_NUMBER)
+    })
   document
     .getElementById(`startBtn_${GAME_NUMBER}`)
     .addEventListener("click", function () {
@@ -53,15 +59,23 @@ function newGame() {
 function startGame(GAME_NUMBER) {
   createButtons()
   const array = createArray(GAME_NUMBER)
+
   const gameState = {
-    array: array,
+    array,
     isGameOver: false,
     gameMessage: "",
-    gameNumber: GAME_NUMBER
+    gameNumber: GAME_NUMBER,
+    intervalId: ""
   }
   setPositions(array)
   console.log(array)
   DrawBoard(gameState)
+  intervalId = setInterval(function () {
+    wolfStep(gameState)
+    message(gameState)
+    DrawBoard(gameState)
+  }, 2000)
+  gameState.intervalId = intervalId
   document.getElementById(`game_${GAME_NUMBER}`).style.display = "block"
   const buttons = document.querySelectorAll(`#buttons_${GAME_NUMBER} > button`)
   for (let button of buttons) {
@@ -77,11 +91,12 @@ function startGame(GAME_NUMBER) {
       startGame(GAME_NUMBER)
     })
 }
+
 function eventMove(gameState, step) {
   rabbitStep(gameState, step)
-  wolfStep(gameState)
+  //wolfStep(gameState)
   message(gameState)
-  console.log(gameState.array)
+  //console.log(gameState.array)
   DrawBoard(gameState)
 }
 
@@ -136,19 +151,21 @@ function setIndexes(characterName, array) {
 
 function wolfStep(gameState) {
   const array = gameState.array
-  const listOfWolfIndexes = getCurrentDir(array, WOLF_CELL)
-  const listOfRabbitIndex = getCurrentDir(array, RABBIT_CELL)[0]
-  listOfWolfIndexes.forEach((wolfIndex) => {
-    const requiredWolfAreaIndexes = getRequiredWolfAreaIndexes(array, wolfIndex)
-    const requiredIndex = []
-    const distances = []
-    requiredWolfAreaIndexes.forEach((coord) => {
-      distances.push(findDistance(coord, listOfRabbitIndex))
-      requiredIndex.push(coord)
+  if (gameState.isGameOver === false) {
+    const listOfWolfIndexes = getCurrentDir(array, WOLF_CELL)
+    const listOfRabbitIndex = getCurrentDir(array, RABBIT_CELL)[0]
+    listOfWolfIndexes.forEach((wolf) => {
+      const requiredWolfAreaIndexes = getWolfValidMoves(array, wolf)
+      const requiredIndex = []
+      const distances = []
+      requiredWolfAreaIndexes.forEach((coord) => {
+        distances.push(findDistance(coord, listOfRabbitIndex))
+        requiredIndex.push(coord)
+      })
+      index = distances.indexOf(Math.min(...distances))
+      wolfMove(gameState, requiredIndex[index], wolf)
     })
-    index = distances.indexOf(Math.min(...distances))
-    wolfMove(gameState, requiredIndex[index], wolfIndex)
-  })
+  }
 }
 
 function wolfMove(gameState, [newX, newY], [oldX, oldY]) {
@@ -165,37 +182,36 @@ function iswin(gameState, [x, y]) {
   if (array[x][y] === HOME_CELL) {
     gameState.gameMessage = "That's Great! You win^^"
     gameState.isGameOver = true
+    clearInterval(gameState.intervalId)
+    console.log(gameState.intervalId)
   } else if (array[x][y] === WOLF_CELL || array[x][y] === RABBIT_CELL) {
     gameState.gameMessage = ":(.. Game over"
     gameState.isGameOver = true
+    clearInterval(gameState.intervalId)
+    console.log(gameState.intervalId)
   }
 }
 
-function getRequiredWolfAreaIndexes(array, index) {
-  const [x, y] = [0, 1]
-  const [wolfX, wolfY] = index
-  const up = [wolfX - 1, wolfY]
-  const right = [wolfX, wolfY + 1]
-  const down = [wolfX + 1, wolfY]
-  const left = [wolfX, wolfY - 1]
-  const wolfAreaIndexes = []
-  if (isInRange(up, array)) {
-    wolfAreaIndexes.push(up)
+function getNearCells(cell) {
+  const [x, y] = cell
+  return [
+    [x - 1, y],
+    [x, y + 1],
+    [x + 1, y],
+    [x, y - 1]
+  ]
+}
+
+function getWolfValidMoves(array, wolf) {
+  function _isinRange(cell) {
+    return isInRange(cell, array)
   }
-  if (isInRange(right, array)) {
-    wolfAreaIndexes.push(right)
+
+  function isValidCell(cell) {
+    const validCells = [EMPTY_CELL, RABBIT_CELL]
+    return validCells.includes(array[cell[0]][cell[1]])
   }
-  if (isInRange(down, array)) {
-    wolfAreaIndexes.push(down)
-  }
-  if (isInRange(left, array)) {
-    wolfAreaIndexes.push(left)
-  }
-  return wolfAreaIndexes.filter(
-    (item) =>
-      array[item[x]][item[y]] === EMPTY_CELL ||
-      array[item[x]][item[y]] === RABBIT_CELL
-  )
+  return getNearCells(wolf).filter(_isinRange).filter(isValidCell)
 }
 
 function findDistance([x1, y1], [x2, y2]) {
@@ -210,6 +226,8 @@ function isInRange([x, y], array) {
 
 function rabbitStep(gameState, step) {
   if (gameState.isGameOver === false) {
+    const listOfIndexes = getCurrentDir(gameState.array, RABBIT_CELL)[0]
+    const [oldX, oldY] = listOfIndexes
     let index = []
     if (step === "left") {
       index = [0, -1]
@@ -231,21 +249,27 @@ function moveRabbit(gameState, [newX, newY]) {
   let x = ""
   let y = ""
   if (newX === -1 && oldX === 0) {
-    ;[x, y] = [oldX + array.length - 1, oldY + newY]
+    ;[x, y] = [array.length - 1, oldY]
   } else if (newX === 1 && oldX === array.length - 1) {
     ;[x, y] = [array.length - oldX - 1, oldY + newY]
   } else if (newY === 1 && oldY === array.length - 1) {
     ;[x, y] = [oldX + newX, array.length - oldY - 1]
   } else if (newY === -1 && oldY === 0) {
-    ;[x, y] = [oldX + newX, oldY + array.length - 1]
+    ;[x, y] = [oldX + newX, array.length - 1]
   } else {
     ;[x, y] = [oldX + newX, oldY + newY]
   }
+  moveRabbitToNewDirection(gameState, [x, y], [oldX, oldY])
+}
 
-  iswin(gameState, [x, y])
-  if (gameState.isGameOver === false && array[x][y] !== FENCE_CELL) {
-    array[x][y] = RABBIT_CELL
-    array[oldX][oldY] = EMPTY_CELL
+function moveRabbitToNewDirection(gameState, [newX, newY], [oldX, oldY]) {
+  iswin(gameState, [newX, newY])
+  if (
+    gameState.isGameOver === false &&
+    gameState.array[newX][newY] !== FENCE_CELL
+  ) {
+    gameState.array[newX][newY] = RABBIT_CELL
+    gameState.array[oldX][oldY] = EMPTY_CELL
   }
 }
 
@@ -318,7 +342,7 @@ function generateImg(coord) {
 
 function createStartBtn(GAME_NUMBER) {
   const div = document.createElement("div")
-  div.className = "start"
+  div.id = `start_${GAME_NUMBER}`
   const btn = document.createElement("button")
   btn.id = `startBtn_${GAME_NUMBER}`
   btn.innerText = "Start"
@@ -389,13 +413,11 @@ function createSelectDiv(GAME_NUMBER) {
   selectDiv.className = `select_${GAME_NUMBER}`
   const select = document.createElement("select")
   select.id = `selectNum_${GAME_NUMBER}`
-
-  const option1 = createOption(5)
-  select.appendChild(option1)
-  const option2 = createOption(7)
-  select.appendChild(option2)
-  const option3 = createOption(10)
-  select.appendChild(option3)
+  const selects = [5, 7, 10]
+  selects.forEach((item) => {
+    const option = createOption(item)
+    select.appendChild(option)
+  })
   selectDiv.appendChild(select)
   selectDiv.style.display = "inline-block"
   return selectDiv
