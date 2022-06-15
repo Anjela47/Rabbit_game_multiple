@@ -94,7 +94,7 @@ function startGame(GAME_NUMBER) {
     wolfStep(gameState)
     message(gameState)
     DrawBoard(gameState)
-  }, 2000)
+  }, 2500)
   gameState.intervalId = intervalId
   document.getElementById(`game_${GAME_NUMBER}`).style.display = "block"
   const buttons = document.querySelectorAll(`#buttons_${GAME_NUMBER} > button`)
