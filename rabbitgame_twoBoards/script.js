@@ -44,22 +44,42 @@ function newGame() {
   GAME.append(btnDiv, select, main)
   const hr = document.createElement("hr")
   container.append(GAME, hr)
+  addListeners(GAME_NUMBER)
+}
+
+function addListeners(GAME_NUMBER) {
+  document
+    .getElementById(`startBtn_${GAME_NUMBER}`)
+    .addEventListener("click", function () {
+      startGame(GAME_NUMBER)
+    })
+  document
+    .getElementById(`startAgain_${GAME_NUMBER}`)
+    .addEventListener("click", function () {
+      document.getElementById(`messageBox_${GAME_NUMBER}`).style.display =
+        "none"
+      startGame(GAME_NUMBER)
+    })
+}
+
+function removeListeners(GAME_NUMBER) {
   document
     .getElementById(`startBtn_${GAME_NUMBER}`)
     .removeEventListener("click", function () {
       startGame(GAME_NUMBER)
     })
   document
-    .getElementById(`startBtn_${GAME_NUMBER}`)
-    .addEventListener("click", function () {
+    .getElementById(`startAgain_${GAME_NUMBER}`)
+    .removeEventListener("click", function () {
+      document.getElementById(`messageBox_${GAME_NUMBER}`).style.display =
+        "none"
       startGame(GAME_NUMBER)
     })
 }
 
 function startGame(GAME_NUMBER) {
-  createButtons()
+  createButtons(GAME_NUMBER)
   const array = createArray(GAME_NUMBER)
-
   const gameState = {
     array,
     isGameOver: false,
@@ -68,7 +88,7 @@ function startGame(GAME_NUMBER) {
     intervalId: ""
   }
   setPositions(array)
-  console.log(array)
+
   DrawBoard(gameState)
   intervalId = setInterval(function () {
     wolfStep(gameState)
@@ -83,20 +103,11 @@ function startGame(GAME_NUMBER) {
       eventMove(gameState, event.target.id)
     })
   }
-  document
-    .getElementById(`startAgain_${GAME_NUMBER}`)
-    .addEventListener("click", function () {
-      document.getElementById(`messageBox_${GAME_NUMBER}`).style.display =
-        "none"
-      startGame(GAME_NUMBER)
-    })
 }
 
 function eventMove(gameState, step) {
   rabbitStep(gameState, step)
-  //wolfStep(gameState)
   message(gameState)
-  //console.log(gameState.array)
   DrawBoard(gameState)
 }
 
@@ -179,16 +190,17 @@ function wolfMove(gameState, [newX, newY], [oldX, oldY]) {
 
 function iswin(gameState, [x, y]) {
   const array = gameState.array
+  const GAME_NUMBER = gameState.gameNumber
   if (array[x][y] === HOME_CELL) {
     gameState.gameMessage = "That's Great! You win^^"
     gameState.isGameOver = true
+    removeListeners(GAME_NUMBER)
     clearInterval(gameState.intervalId)
-    console.log(gameState.intervalId)
   } else if (array[x][y] === WOLF_CELL || array[x][y] === RABBIT_CELL) {
     gameState.gameMessage = ":(.. Game over"
     gameState.isGameOver = true
+    removeListeners(GAME_NUMBER)
     clearInterval(gameState.intervalId)
-    console.log(gameState.intervalId)
   }
 }
 
@@ -227,7 +239,7 @@ function isInRange([x, y], array) {
 function rabbitStep(gameState, step) {
   if (gameState.isGameOver === false) {
     const listOfIndexes = getCurrentDir(gameState.array, RABBIT_CELL)[0]
-    const [oldX, oldY] = listOfIndexes
+
     let index = []
     if (step === "left") {
       index = [0, -1]
@@ -387,7 +399,7 @@ function createButton(step) {
   return btn
 }
 
-function createButtons() {
+function createButtons(GAME_NUMBER) {
   const ButtonsDiv = document.getElementById(`buttons_${GAME_NUMBER}`)
   while (ButtonsDiv.lastElementChild) {
     ButtonsDiv.removeChild(ButtonsDiv.lastElementChild)
