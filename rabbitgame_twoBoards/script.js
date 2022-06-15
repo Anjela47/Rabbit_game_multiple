@@ -90,12 +90,11 @@ function startGame(GAME_NUMBER) {
   setPositions(array)
 
   DrawBoard(gameState)
-  intervalId = setInterval(function () {
+  gameState.intervalId = setInterval(function () {
     wolfStep(gameState)
     message(gameState)
     DrawBoard(gameState)
   }, 2500)
-  gameState.intervalId = intervalId
   document.getElementById(`game_${GAME_NUMBER}`).style.display = "block"
   const buttons = document.querySelectorAll(`#buttons_${GAME_NUMBER} > button`)
   for (let button of buttons) {
