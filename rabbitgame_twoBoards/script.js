@@ -25,6 +25,7 @@ const character = [
   }
 ]
 
+
 function newGame() {
   GAME_NUMBER++
   const container = document.getElementById("container")
