@@ -6,7 +6,7 @@ const FENCE_CELL = 4
 const WOLF_PROCENT = 0.6
 const FENCE_PROCENT = 0.4
 let GAME_NUMBER = 0
-let character = [
+const character = [
   {
     name: "rabbit",
     num: RABBIT_CELL
@@ -25,12 +25,7 @@ let character = [
   }
 ]
 
-function createNewGameDiv(GAME_NUMBER) {
-  const GAME = document.createElement("div")
-  GAME.id = `game_${GAME_NUMBER}`
-  GAME.style.textAlign = "center"
-  return GAME
-}
+const GAME_STATE = {}
 
 function newGame() {
   GAME_NUMBER++
@@ -47,38 +42,14 @@ function newGame() {
   addListeners(GAME_NUMBER)
 }
 
-function addListeners(GAME_NUMBER) {
-  document
-    .getElementById(`startBtn_${GAME_NUMBER}`)
-    .addEventListener("click", function () {
-      startGame(GAME_NUMBER)
-    })
-  document
-    .getElementById(`startAgain_${GAME_NUMBER}`)
-    .addEventListener("click", function () {
-      document.getElementById(`messageBox_${GAME_NUMBER}`).style.display =
-        "none"
-      startGame(GAME_NUMBER)
-    })
-}
-
-function removeListeners(GAME_NUMBER) {
-  document
-    .getElementById(`startBtn_${GAME_NUMBER}`)
-    .removeEventListener("click", function () {
-      startGame(GAME_NUMBER)
-    })
-  document
-    .getElementById(`startAgain_${GAME_NUMBER}`)
-    .removeEventListener("click", function () {
-      document.getElementById(`messageBox_${GAME_NUMBER}`).style.display =
-        "none"
-      startGame(GAME_NUMBER)
-    })
+function createNewGameDiv(GAME_NUMBER) {
+  const GAME = document.createElement("div")
+  GAME.id = `game_${GAME_NUMBER}`
+  GAME.style.textAlign = "center"
+  return GAME
 }
 
 function startGame(GAME_NUMBER) {
-  createButtons(GAME_NUMBER)
   const array = createArray(GAME_NUMBER)
   const gameState = {
     array,
@@ -88,13 +59,8 @@ function startGame(GAME_NUMBER) {
     intervalId: ""
   }
   setPositions(array)
-
   DrawBoard(gameState)
-  gameState.intervalId = setInterval(function () {
-    wolfStep(gameState)
-    message(gameState)
-    DrawBoard(gameState)
-  }, 2500)
+  createButtons(GAME_NUMBER)
   document.getElementById(`game_${GAME_NUMBER}`).style.display = "block"
   const buttons = document.querySelectorAll(`#buttons_${GAME_NUMBER} > button`)
   for (let button of buttons) {
@@ -102,6 +68,11 @@ function startGame(GAME_NUMBER) {
       eventMove(gameState, event.target.id)
     })
   }
+  gameState.intervalId = setInterval(function () {
+    wolfStep(gameState)
+    message(gameState)
+    DrawBoard(gameState)
+  }, 2500)
 }
 
 function eventMove(gameState, step) {
@@ -213,6 +184,16 @@ function getNearCells(cell) {
   ]
 }
 
+function findDistance([x1, y1], [x2, y2]) {
+  return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2))
+}
+
+function isInRange([x, y], array) {
+  if (x != array.length && x >= 0 && y != array.length && y >= 0) {
+    return true
+  }
+}
+
 function getWolfValidMoves(array, wolf) {
   function _isinRange(cell) {
     return isInRange(cell, array)
@@ -225,52 +206,53 @@ function getWolfValidMoves(array, wolf) {
   return getNearCells(wolf).filter(_isinRange).filter(isValidCell)
 }
 
-function findDistance([x1, y1], [x2, y2]) {
-  return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2))
-}
-
-function isInRange([x, y], array) {
-  if (x != array.length && x >= 0 && y != array.length && y >= 0) {
-    return true
+function getRabbitNearCell(cell, step) {
+  const [x, y] = cell
+  let index = []
+  if (step === "left") {
+    index = [x, y - 1]
+  } else if (step === "up") {
+    index = [x - 1, y]
+  } else if (step === "right") {
+    index = [x, y + 1]
+  } else if (step === "down") {
+    index = [x + 1, y]
   }
+  return index
 }
 
 function rabbitStep(gameState, step) {
   if (gameState.isGameOver === false) {
     const listOfIndexes = getCurrentDir(gameState.array, RABBIT_CELL)[0]
-
-    let index = []
-    if (step === "left") {
-      index = [0, -1]
-    } else if (step === "up") {
-      index = [-1, 0]
-    } else if (step === "right") {
-      index = [0, 1]
-    } else if (step === "down") {
-      index = [1, 0]
-    }
-    moveRabbit(gameState, index)
+    const nearCell = getRabbitNearCell(listOfIndexes, step)
+    moveRabbit(gameState, nearCell, listOfIndexes)
   }
 }
 
-function moveRabbit(gameState, [newX, newY]) {
+function moveRabbit(gameState, [newX, newY], [oldX, oldY]) {
   const array = gameState.array
-  const listOfIndexes = getCurrentDir(gameState.array, RABBIT_CELL)[0]
-  const [oldX, oldY] = listOfIndexes
   let x = ""
   let y = ""
-  if (newX === -1 && oldX === 0) {
-    ;[x, y] = [array.length - 1, oldY]
-  } else if (newX === 1 && oldX === array.length - 1) {
-    ;[x, y] = [array.length - oldX - 1, oldY + newY]
-  } else if (newY === 1 && oldY === array.length - 1) {
-    ;[x, y] = [oldX + newX, array.length - oldY - 1]
-  } else if (newY === -1 && oldY === 0) {
-    ;[x, y] = [oldX + newX, array.length - 1]
+  if (isInRange([newX, newY], array)) {
+    ;[x, y] = [newX, newY]
   } else {
-    ;[x, y] = [oldX + newX, oldY + newY]
+    ;[x, y] = getRabbitJumpCoord(array, [newX, newY], [oldX, oldY])
   }
   moveRabbitToNewDirection(gameState, [x, y], [oldX, oldY])
+}
+
+function getRabbitJumpCoord(array, [newX, newY], [oldX, oldY]) {
+  let coord = ""
+  if (newX === -1) {
+    coord = [array.length - 1, oldY]
+  } else if (newY === -1) {
+    coord = [oldX, array.length - 1]
+  } else if (newX === array.length) {
+    coord = [0, oldY]
+  } else if (newY === array.length) {
+    coord = [oldX, 0]
+  }
+  return coord
 }
 
 function moveRabbitToNewDirection(gameState, [newX, newY], [oldX, oldY]) {
@@ -432,4 +414,34 @@ function createSelectDiv(GAME_NUMBER) {
   selectDiv.appendChild(select)
   selectDiv.style.display = "inline-block"
   return selectDiv
+}
+
+function addListeners(GAME_NUMBER) {
+  document
+    .getElementById(`startBtn_${GAME_NUMBER}`)
+    .addEventListener("click", function () {
+      startGame(GAME_NUMBER)
+    })
+  document
+    .getElementById(`startAgain_${GAME_NUMBER}`)
+    .addEventListener("click", function () {
+      document.getElementById(`messageBox_${GAME_NUMBER}`).style.display =
+        "none"
+      startGame(GAME_NUMBER)
+    })
+}
+
+function removeListeners(GAME_NUMBER) {
+  document
+    .getElementById(`startBtn_${GAME_NUMBER}`)
+    .removeEventListener("click", function () {
+      startGame(GAME_NUMBER)
+    })
+  document
+    .getElementById(`startAgain_${GAME_NUMBER}`)
+    .removeEventListener("click", function () {
+      document.getElementById(`messageBox_${GAME_NUMBER}`).style.display =
+        "none"
+      startGame(GAME_NUMBER)
+    })
 }
