@@ -25,8 +25,6 @@ const character = [
   }
 ]
 
-const GAME_STATE = {}
-
 function newGame() {
   GAME_NUMBER++
   const container = document.getElementById("container")
