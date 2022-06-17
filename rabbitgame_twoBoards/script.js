@@ -25,6 +25,7 @@ const character = [
   }
 ]
 
+const GAME_STATES = {}
 
 function newGame() {
   GAME_NUMBER++
@@ -50,13 +51,22 @@ function createNewGameDiv(GAME_NUMBER) {
 
 function startGame(GAME_NUMBER) {
   const array = createArray(GAME_NUMBER)
+  if (GAME_STATES[GAME_NUMBER]) {
+    clearInterval(GAME_STATES[GAME_NUMBER].intervalId)
+  }
+
   const gameState = {
     array,
     isGameOver: false,
     gameMessage: "",
     gameNumber: GAME_NUMBER,
-    intervalId: ""
+    intervalId: setInterval(function () {
+      wolfStep(gameState)
+      message(gameState)
+      DrawBoard(gameState)
+    }, 2500)
   }
+  GAME_STATES[GAME_NUMBER] = gameState
   setPositions(array)
   DrawBoard(gameState)
   createButtons(GAME_NUMBER)
@@ -67,13 +77,8 @@ function startGame(GAME_NUMBER) {
       eventMove(gameState, event.target.id)
     })
   }
-  gameState.intervalId = setInterval(function () {
-    wolfStep(gameState)
-    message(gameState)
-    DrawBoard(gameState)
-  }, 2500)
 }
-
+console.log(GAME_STATES)
 function eventMove(gameState, step) {
   rabbitStep(gameState, step)
   message(gameState)
@@ -164,12 +169,10 @@ function iswin(gameState, [x, y]) {
     gameState.gameMessage = "That's Great! You win^^"
     gameState.isGameOver = true
     removeListeners(GAME_NUMBER)
-    clearInterval(gameState.intervalId)
   } else if (array[x][y] === WOLF_CELL || array[x][y] === RABBIT_CELL) {
     gameState.gameMessage = ":(.. Game over"
     gameState.isGameOver = true
     removeListeners(GAME_NUMBER)
-    clearInterval(gameState.intervalId)
   }
 }
 
