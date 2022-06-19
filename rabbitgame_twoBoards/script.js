@@ -78,7 +78,6 @@ function startGame(GAME_NUMBER) {
     })
   }
 }
-console.log(GAME_STATES)
 function eventMove(gameState, step) {
   rabbitStep(gameState, step)
   message(gameState)
