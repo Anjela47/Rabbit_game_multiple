@@ -63,8 +63,8 @@ function startGame(GAME_NUMBER) {
     intervalId: setInterval(function () {
       wolfStep(gameState)
       message(gameState)
-      DrawBoard(gameState)
-    }, 2500)
+      //DrawBoard(gameState)
+    }, 2000)
   }
   GAME_STATES[GAME_NUMBER] = gameState
   setPositions(array)
@@ -137,8 +137,8 @@ function wolfStep(gameState) {
   const array = gameState.array
   if (gameState.isGameOver === false) {
     const listOfWolfIndexes = getCurrentDir(array, WOLF_CELL)
-    const listOfRabbitIndex = getCurrentDir(array, RABBIT_CELL)[0]
     listOfWolfIndexes.forEach((wolf) => {
+      const listOfRabbitIndex = getCurrentDir(array, RABBIT_CELL)[0]
       const requiredWolfAreaIndexes = getWolfValidMoves(array, wolf)
       const requiredIndex = []
       const distances = []
@@ -147,9 +147,15 @@ function wolfStep(gameState) {
         requiredIndex.push(coord)
       })
       index = distances.indexOf(Math.min(...distances))
-      wolfMove(gameState, requiredIndex[index], wolf)
+      setTimeoutForWolfMove(gameState, requiredIndex[index], wolf)
     })
   }
+}
+
+function setTimeoutForWolfMove(gameState, requiredIndex, wolf) {
+  const randomInterval = 700 + Math.random() * 500
+  setTimeout(wolfMove, randomInterval, gameState, requiredIndex, wolf)
+  setTimeout(DrawBoard, randomInterval, gameState)
 }
 
 function wolfMove(gameState, [newX, newY], [oldX, oldY]) {
